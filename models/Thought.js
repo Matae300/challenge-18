@@ -27,4 +27,11 @@ const thoughtSchema = new Schema(
   }
 );
 
+thoughtSchema
+  .virtual('reactionCount')
+  // Getter
+  .get(function () {
+    return this.reactionSchema.length;
+  });
+
 module.exports = thoughtSchema;

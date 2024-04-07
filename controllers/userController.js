@@ -64,5 +64,28 @@ module.exports = {
     } catch (err) {
       res.status(500).json(err);
     }
+  },
+
+  createFriend: async function(username, email) {
+    try {
+      const friend = await User.create({ username, email });
+      console.log('Friend created:', friend);
+    } catch (err) {
+      console.error('Error creating friend:', err);
+    }
+  },
+
+  async deleteFriends(req, res) {
+    try {
+      const deletedFriend = await User.findOneAndDelete({ _id: req.params.userId });
+  
+      if (!deletedFriend) {
+        return res.status(404).json({ message: 'No friend with that ID' });
+      }
+  
+      res.json({ message: 'Friend deleted successfully' });
+    } catch (err) {
+      res.status(500).json(err);
+    }
   }
 };
