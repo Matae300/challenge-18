@@ -31,7 +31,7 @@ thoughtSchema
   .virtual('reactionCount')
   // Getter
   .get(function () {
-    return this.reactionSchema.length;
+    return this.reactions.length;
   });
 
 module.exports = thoughtSchema;
