@@ -1,4 +1,4 @@
-const { Thought } = require('../models'); // Assuming only Thoughts is used in this file
+const { Thought, Reaction } = require('../models');
 
 module.exports = {
   async getThoughts(req, res) {
@@ -12,7 +12,7 @@ module.exports = {
 
   async getSingleThought(req, res) {
     try {
-      const thought = await Thought.findOne({ _id: req.params.userId }).select('-__v');
+      const thought = await Thought.findOne({ _id: req.params.thoughtId }).select('-__v');
 
       if (!thought) {
         return res.status(404).json({ message: 'No thought with that ID' });
@@ -36,7 +36,7 @@ module.exports = {
   async updateThought(req, res) {
     try {
       const thought = await Thought.findOneAndUpdate(
-        { _id: req.params.userId },
+        { _id: req.params.thoughtId },
         { $set: req.body },
         { runValidators: true, new: true }
       );
@@ -54,13 +54,13 @@ module.exports = {
 
   async deleteThought(req, res) {
     try {
-      const thought = await Thought.findOneAndDelete({ _id: req.params.userId });
+      const thought = await Thought.findOneAndDelete({ _id: req.params.thoughtId });
 
       if (!thought) {
         return res.status(404).json({ message: 'No thought with that ID' });
       }
 
-      res.json({ message: 'Thought deleted successfully' }); // Send a response after successful deletion
+      res.json({ message: 'Thought deleted successfully' });
     } catch (err) {
       res.status(500).json(err);
     }
@@ -87,16 +87,25 @@ module.exports = {
   },
 
   async deleteReaction(req, res) {
-    try {
-      const reaction = await Reactions.findOneAndDelete({ _id: req.params.reactionId });
+    const { thoughtId } = req.params;
 
-      if (!reaction) {
-        return res.status(404).json({ message: 'No reaction with that ID' });
+    try {
+      const thought = await Thought.findById(thoughtId);
+
+      if (!thought) {
+        return res.status(404).json({ message: 'No thought found' });
       }
 
-      res.json({ message: 'Reaction deleted successfully' }); // Send a response after successful deletion
+      const deletedReaction = await Reaction.findOneAndDelete({ _id: req.params.reactionId });
+
+      if (!deletedReaction) {
+        return res.status(404).json({ message: 'Reaction not found' });
+      }
+
+      res.json({ message: 'Reaction deleted successfully' });
     } catch (err) {
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
-  }
+  },
 };

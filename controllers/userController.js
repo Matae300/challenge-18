@@ -6,7 +6,8 @@ module.exports = {
       const users = await User.find();
       res.json(users);
     } catch (err) {
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
@@ -15,21 +16,23 @@ module.exports = {
       const user = await User.findOne({ _id: req.params.userId }).select('-__v');
 
       if (!user) {
-        return res.status(404).json({ message: 'No user with that ID' });
+        return res.status(404).json({ message: 'User not found' });
       }
 
       res.json(user);
     } catch (err) {
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
   async createUser(req, res) {
     try {
       const user = await User.create(req.body);
-      res.json(user);
+      res.status(201).json(user);
     } catch (err) {
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
@@ -42,13 +45,13 @@ module.exports = {
       );
 
       if (!updatedUser) {
-        return res.status(404).json({ message: 'No user with this ID' });
+        return res.status(404).json({ message: 'User not found' });
       }
 
       res.json(updatedUser);
     } catch (err) {
-      console.log(err);
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
@@ -57,35 +60,44 @@ module.exports = {
       const deletedUser = await User.findOneAndDelete({ _id: req.params.userId });
 
       if (!deletedUser) {
-        return res.status(404).json({ message: 'No user with that ID' });
+        return res.status(404).json({ message: 'User not found' });
       }
 
       res.json({ message: 'User deleted successfully' });
     } catch (err) {
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
-  createFriend: async function(username, email) {
+  async createFriend(req, res) {
+    const { username, email } = req.body;
+
     try {
+      if (!username || !email) {
+        return res.status(400).json({ message: 'Username and email are required' });
+      }
+      
       const friend = await User.create({ username, email });
-      console.log('Friend created:', friend);
+      res.status(201).json({ message: 'Friend created successfully', friend });
     } catch (err) {
-      console.error('Error creating friend:', err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
   async deleteFriends(req, res) {
     try {
-      const deletedFriend = await User.findOneAndDelete({ _id: req.params.userId });
+      const deletedFriend = await User.findOneAndDelete({ _id: req.params.friendId });
   
       if (!deletedFriend) {
-        return res.status(404).json({ message: 'No friend with that ID' });
+        return res.status(404).json({ message: 'Friend not found' });
       }
   
       res.json({ message: 'Friend deleted successfully' });
     } catch (err) {
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 };
